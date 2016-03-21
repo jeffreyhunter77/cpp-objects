@@ -1,0 +1,108 @@
+var inc = 'inc';
+var src = 'src';
+var build = 'build';
+var lib = 'cpp-objects';
+var test = 'tests';
+
+var cxx = {
+  cxx: 'g++',
+  includes: [],
+  libDirs: [],
+  libs: [],
+  flags: [],
+  testSuffix: '.test'
+};
+
+var staticLib = {
+  ar: 'ar',
+  prefix: 'lib',
+  suffix: '.a'
+};
+
+var headers = listDir(inc)
+                .filter(function(name) { return /\.h(pp)?$/.test(name); });
+
+var sources = listDir(src)
+                .filter(function(name) { return /\.C$|\.c(pp)?$/.test(name); });
+
+var objects = sources
+                .map(function(name) { return name.replace(/\.C$|\.c(pp)?$/, '.o'); });
+
+
+var tests = listDir(test)
+                .filter(function(name) { return /\.C$|\.c(pp)?$/.test(name); });
+
+var testProgs = tests
+                .map(function(name) { return name.replace(/\.C$|\.c(pp)?$/, cxx.testSuffix); });
+
+cxx.includes.push(inc);
+
+function joinPath(a, b) {
+  return a + '/' + b;
+}
+
+function esc(val) {
+  return "'" + String(val).replace(/'/g, "'\"'\"'") + "'";
+}
+
+function cxxflags(moreFlags) {
+  return cxx.includes
+    .map(function(dir) { return '-I ' + esc(dir); })
+    .concat(cxx.flags)
+    .concat(moreFlags || [])
+    .join(' ');
+}
+
+function libname(lib) {
+  return joinPath(build, staticLib.prefix + lib + staticLib.suffix);
+}
+
+rules.all = {
+  dependsOn: libname(lib)
+};
+
+rules.clean = {
+  commands: ['rm -rf ' + esc(build)]
+            .concat(testProgs.map(function(prog) {
+              return 'rm -rf ' + esc(joinPath(test, prog));
+            }))
+};
+
+rules[build] = {
+  commands: ('mkdir -p ' + esc(build))
+};
+
+rules[libname(lib)] = {
+  dependsOn: objects.map(joinPath.bind(this, build)),
+  commands: [staticLib.ar, 'rcs', libname(lib)]
+              .concat(objects.map(joinPath.bind(this, build)))
+              .join(' ')
+};
+
+sources.forEach(function(name) {
+  var source = joinPath(src, name)
+  var result = joinPath(build, name.replace(/\.C$|\.c(pp)?$/, '.o'));
+
+  rules[result] = {
+    dependsOn: [build, source].concat(headers.map(joinPath.bind(this, inc))),
+    commands: [cxx.cxx, cxxflags(), '-c -o', esc(result), esc(source)].join(' ')
+  };
+});
+
+tests.forEach(function(name) {
+  var source = joinPath(test, name)
+  var result = joinPath(test, name.replace(/\.C$|\.c(pp)?$/, cxx.testSuffix));
+
+  rules[result] = {
+    dependsOn: [libname(lib), source],
+    commands: [cxx.cxx, cxxflags(), '-o', esc(result), '-L', esc(build), esc('-l' + lib), esc(source)].join(' ')
+  };
+});
+
+rules.test = {
+  dependsOn: testProgs.map(joinPath.bind(this, test)),
+  commands: testProgs.map(joinPath.bind(this, test))
+}
+
+// depfile generation:
+// g++ -I inc -MM -MT build/Object.o -dependency-file build/Object.dep src/Object.cpp
