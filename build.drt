@@ -101,7 +101,9 @@ tests.forEach(function(name) {
 
 rules.test = {
   dependsOn: testProgs.map(joinPath.bind(this, test)),
-  commands: testProgs.map(joinPath.bind(this, test))
+  commands: testProgs.map(function(prog) {
+    return esc(joinPath(test, prog)) + ' --use-colour yes';
+  })
 }
 
 // depfile generation:
