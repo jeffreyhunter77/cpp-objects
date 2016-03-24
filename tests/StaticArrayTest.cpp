@@ -1,4 +1,4 @@
-#include <Array.hpp>
+#include <StaticArray.hpp>
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
@@ -13,25 +13,25 @@ struct Num {
   Num(int val = 100) :value(val) { }
 };
 
-typedef Array<int> IntArray;
-typedef Array<struct Num> NumArray;
+typedef StaticArray<int> IntStaticArray;
+typedef StaticArray<struct Num> NumStaticArray;
 
-TEST_CASE("Array constructor", "[Array]") {
+TEST_CASE("StaticArray constructor", "[StaticArray]") {
 
   SECTION("without arguments creates an empty array") {
-    IntArray a;
+    IntStaticArray a;
 
     REQUIRE( a.size() == 0 );
   }
 
   SECTION("allocates an array with the specified size") {
-    IntArray a(10);
+    IntStaticArray a(10);
 
     REQUIRE( a.size() == 10 );
   }
 
   SECTION("initializes the array") {
-    NumArray a(10);
+    NumStaticArray a(10);
 
     for (int i = 0; i < 10; ++i) {
       REQUIRE( a.get(i).value == 100 );
@@ -40,7 +40,7 @@ TEST_CASE("Array constructor", "[Array]") {
 
   SECTION("performs a copy when initialized with an array and size") {
     int evens[] = {2, 4, 6, 8, 10, 12, 14};
-    IntArray a(evens, 7);
+    IntStaticArray a(evens, 7);
 
     REQUIRE( a.size() == 7 );
 
@@ -52,23 +52,23 @@ TEST_CASE("Array constructor", "[Array]") {
   }
 
   SECTION("throws an exception when given an invalid size") {
-    REQUIRE_THROWS_AS( IntArray a(-40), Exception );
+    REQUIRE_THROWS_AS( IntStaticArray a(-40), Exception );
   }
 
 }
 
-TEST_CASE("Array.classInfo", "[Array]") {
-  IntArray a;
+TEST_CASE("StaticArray.classInfo", "[StaticArray]") {
+  IntStaticArray a;
 
-  SECTION("returns the Array class info object") {
-    REQUIRE( strcmp(a.classInfo().name(), "Array") == 0 );
+  SECTION("returns the StaticArray class info object") {
+    REQUIRE( strcmp(a.classInfo().name(), "StaticArray") == 0 );
   }
 
 }
 
-TEST_CASE("Array.get", "[Array]") {
+TEST_CASE("StaticArray.get", "[StaticArray]") {
   int odds[] = {1, 3, 5, 7, 9, 11, 13};
-  IntArray a(odds, 7);
+  IntStaticArray a(odds, 7);
 
   SECTION("returns the item at the provided zero-based index") {
     REQUIRE( a.get(2) == 5 );
@@ -85,9 +85,9 @@ TEST_CASE("Array.get", "[Array]") {
 }
 
 
-TEST_CASE("Array.operator[]", "[Array]") {
+TEST_CASE("StaticArray.operator[]", "[StaticArray]") {
   int odds[] = {1, 3, 5, 7, 9, 11, 13};
-  IntArray a(odds, 7);
+  IntStaticArray a(odds, 7);
 
   SECTION("returns the item at the provided zero-based index") {
     REQUIRE( a[2] == 5 );
@@ -103,22 +103,3 @@ TEST_CASE("Array.operator[]", "[Array]") {
   }
 }
 
-TEST_CASE("Array.set", "[Array]") {
-  int odds[] = {1, 3, 5, 7, 9, 11, 13};
-  IntArray a(odds, 7);
-
-  SECTION("sets the item at the provided zero-based index") {
-    a.set(2, 3);
-    REQUIRE( a.get(2) == 3 );
-  }
-
-  SECTION("sets item offset from the end of the list when given a negative index") {
-    a.set(-3, 11);
-    REQUIRE( a.get(4) == 11 );
-  }
-
-  SECTION("throws an exception when given an index past the end of the list") {
-    REQUIRE_THROWS_AS( a.set(7, 0), Exception );
-    REQUIRE_THROWS_AS( a.set(-12, 0), Exception );
-  }
-}
