@@ -25,6 +25,19 @@ TEST_CASE("Vector constructor", "[Vector]") {
     REQUIRE( v.capacity() == 10 );
   }
 
+  SECTION("performs a copy when initialized with an array and size") {
+    int evens[] = {2, 4, 6, 8, 10, 12, 14};
+    IntVector v(evens, 7);
+
+    REQUIRE( v.size() == 7 );
+
+    for (int i = 0; i < 7; ++i) {
+      REQUIRE( v.get(i) == evens[i] );
+    }
+
+    REQUIRE( v.cArray() != evens );
+  }
+
 }
 
 TEST_CASE("Vector.classInfo", "[Vector]") {
@@ -35,3 +48,58 @@ TEST_CASE("Vector.classInfo", "[Vector]") {
   }
 
 }
+
+TEST_CASE("Vector.push", "[Vector]") {
+  IntVector v(3);
+
+  SECTION("adds an item to the end of the list") {
+    v.push(1);
+
+    REQUIRE( v.size() == 1 );
+    REQUIRE( v[0] == 1 );
+  }
+
+  SECTION("permits chaining") {
+    v.push(1).push(3);
+
+    REQUIRE( v.size() == 2 );
+    REQUIRE( v[0] == 1 );
+    REQUIRE( v[1] == 3 );
+  }
+
+  SECTION("grows the list when capacity is exceeded") {
+    int* oldData = v.cArray();
+    v.push(1).push(3).push(5).push(7).push(9);
+
+    REQUIRE( v.size() == 5 );
+    REQUIRE( v.capacity() > 3 );
+    REQUIRE( v[0] == 1 );
+    REQUIRE( v[1] == 3 );
+    REQUIRE( v[2] == 5 );
+    REQUIRE( v[3] == 7 );
+    REQUIRE( v[4] == 9 );
+    REQUIRE( v.cArray() != oldData );
+  }
+
+  SECTION("grows a list from an initial capacity of 0") {
+    IntVector emptyV(0);
+    emptyV.push(3).push(2).push(1);
+
+    REQUIRE( emptyV.size() == 3 );
+    REQUIRE( emptyV.capacity() >= 3 );
+    REQUIRE( emptyV[0] == 3 );
+    REQUIRE( emptyV[1] == 2 );
+    REQUIRE( emptyV[2] == 1 );
+  }
+}
+
+TEST_CASE("Vector.get", "[Vector]") {
+  IntVector v(20);
+  v.push(1).push(3).push(5);
+
+  SECTION("throws an exception when given an index past the end of the list") {
+    REQUIRE_THROWS_AS( v.get(7), Exception );
+    REQUIRE_THROWS_AS( v.get(-12), Exception );
+  }
+}
+

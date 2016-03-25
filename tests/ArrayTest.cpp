@@ -122,3 +122,23 @@ TEST_CASE("Array.set", "[Array]") {
     REQUIRE_THROWS_AS( a.set(-12, 0), Exception );
   }
 }
+
+TEST_CASE("Array.operator[]=", "[Array]") {
+  int odds[] = {1, 3, 5, 7, 9, 11, 13};
+  IntArray a(odds, 7);
+
+  SECTION("sets the item at the provided zero-based index") {
+    a[2] = 3;
+    REQUIRE( a.get(2) == 3 );
+  }
+
+  SECTION("sets item offset from the end of the list when given a negative index") {
+    a[-3] = 11;
+    REQUIRE( a.get(4) == 11 );
+  }
+
+  SECTION("throws an exception when given an index past the end of the list") {
+    REQUIRE_THROWS_AS( a[7] = 0, Exception );
+    REQUIRE_THROWS_AS( a[-12] = 0, Exception );
+  }
+}

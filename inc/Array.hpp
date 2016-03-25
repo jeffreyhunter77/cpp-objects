@@ -8,19 +8,18 @@ namespace Objects {
   extern const Class ArrayClass;
 
   template <class T> class Array : public StaticArray<T> {
-  private:
-    typedef StaticArray<T> super;
-
   public:
     typedef typename Sequence<T>::index_t index_t;
 
     Array() : StaticArray<T>() { }
     Array(index_t size) : StaticArray<T>(size) { }
-    Array(T* array, index_t size) : StaticArray<T>(array, size) { }
+    Array(const T* array, index_t size) : StaticArray<T>(array, size) { }
 
     const Class& classInfo() const { return ArrayClass; }
 
-    void set(index_t index, const T& value) { super::_data[super::normalizeIndex(index)] = value; }
+    virtual void set(index_t index, const T& value) { this->_data[this->normalizeIndex(index)] = value; }
+
+    virtual T& operator[](index_t index) { return this->_data[this->normalizeIndex(index)]; }
   };
 
 };

@@ -15,7 +15,7 @@ namespace Objects {
 
     StaticArray(index_t size) : _size(0), _data(0) { initWithSize(size); }
 
-    StaticArray(T* array, index_t size) : _size(0), _data(0) {
+    StaticArray(const T* array, index_t size) : _size(0), _data(0) {
       initWithSize(size);
       for (index_t i = 0; i < size; ++i) _data[i] = array[i];
     }
@@ -41,8 +41,11 @@ namespace Objects {
   protected:
 
     index_t normalizeIndex(index_t index) const {
-      if (index < 0) index = _size + index;
-      if (index >= _size || index < 0) throw Exception("Index out of range");
+      index_t s = size();
+
+      if (index < 0) index = s + index;
+      if (index >= s || index < 0) throw Exception("Index out of range");
+
       return index;
     }
 
