@@ -23,17 +23,27 @@ namespace Objects {
     index_t size() const { return _entries; }
     virtual index_t capacity() const { return super::size(); }
 
-    virtual Vector<T>& push(T item) {
-      ensureCapacity(_entries + 1);
-      super::set(_entries++, item);
-      return *this;
-    }
+    virtual Vector<T>& push(const T item) { return insert(_entries, item); }
 
     virtual T pop() {
       if (_entries > 0)
         return this->_data[--_entries];
       else
         throw Exception("Cannot pop from an empty list");
+    }
+
+    virtual Vector<T>& insert(index_t atIndex, const T item) {
+      ensureCapacity(_entries + 1);
+
+      atIndex = atIndex == _entries ? atIndex : this->normalizeIndex(atIndex);
+
+      shiftLeft(atIndex);
+
+      ++_entries;
+
+      this->set(atIndex, item);
+
+      return *this;
     }
 
   protected:
@@ -59,6 +69,11 @@ namespace Objects {
 
       this->_data = _newData;
       this->_size = newCapacity;
+    }
+
+    void shiftLeft(index_t fromIndex) {
+      for (index_t i = _entries; i > fromIndex; --i)
+        this->_data[i] = this->_data[i - 1];
     }
 
     index_t _entries;

@@ -119,3 +119,65 @@ TEST_CASE("Vector.pop", "[Vector]") {
     REQUIRE( empty.size() == 0 );
   }
 }
+
+TEST_CASE("Vector.insert", "[Vector]") {
+  int odds[] = {1, 3, 5};
+  IntVector v(odds, 3);
+
+  SECTION("supports addition of an item at the start of the list") {
+    v.insert(0, -1);
+
+    REQUIRE( v.size() == 4 );
+    REQUIRE( v.capacity() >= 4 );
+    REQUIRE( v[0] == -1 );
+    REQUIRE( v[1] == 1 );
+    REQUIRE( v[2] == 3 );
+    REQUIRE( v[3] == 5 );
+  }
+
+  SECTION("supports addition of an item at the end of the list") {
+    v.insert(3, 7);
+
+    REQUIRE( v.size() == 4 );
+    REQUIRE( v.capacity() >= 4 );
+    REQUIRE( v[0] == 1 );
+    REQUIRE( v[1] == 3 );
+    REQUIRE( v[2] == 5 );
+    REQUIRE( v[3] == 7 );
+  }
+
+  SECTION("supports insertion of an item in the middle of the list") {
+    v.insert(1, 2);
+
+    REQUIRE( v.size() == 4 );
+    REQUIRE( v.capacity() >= 4 );
+    REQUIRE( v[0] == 1 );
+    REQUIRE( v[1] == 2 );
+    REQUIRE( v[2] == 3 );
+    REQUIRE( v[3] == 5 );
+  }
+
+  SECTION("treats negative indexes as offsets from the end") {
+    v.insert(-1, 4);
+
+    REQUIRE( v.size() == 4 );
+    REQUIRE( v.capacity() >= 4 );
+    REQUIRE( v[0] == 1 );
+    REQUIRE( v[1] == 3 );
+    REQUIRE( v[2] == 4 );
+    REQUIRE( v[3] == 5 );
+  }
+
+  SECTION("supports chaining") {
+    v.insert(3, 7).insert(4, 9);
+
+    REQUIRE( v.size() == 5 );
+    REQUIRE( v[3] == 7 );
+    REQUIRE( v[4] == 9 );
+  }
+
+  SECTION("throws an exception when called with an invalid index") {
+    REQUIRE_THROWS_AS( v.insert(4, 9), Exception );
+    REQUIRE_THROWS_AS( v.insert(-4, -1), Exception );
+  }
+}
