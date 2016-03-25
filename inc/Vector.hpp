@@ -29,6 +29,13 @@ namespace Objects {
       return *this;
     }
 
+    virtual T pop() {
+      if (_entries > 0)
+        return this->_data[--_entries];
+      else
+        throw Exception("Cannot pop from an empty list");
+    }
+
   protected:
     const static index_t MIN_CAPACITY = 6;
 

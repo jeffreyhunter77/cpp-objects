@@ -103,3 +103,19 @@ TEST_CASE("Vector.get", "[Vector]") {
   }
 }
 
+TEST_CASE("Vector.pop", "[Vector]") {
+  int odds[] = {1, 3, 5, 7, 9, 11, 13};
+  IntVector v(odds, 7);
+
+  SECTION("removes the last item from the list and returns it") {
+    REQUIRE( v.pop() == 13 );
+    REQUIRE( v.size() == 6 );
+    REQUIRE( v[5] == 11 );
+  }
+
+  SECTION("throws an exception when called on an empty vector") {
+    IntVector empty;
+    REQUIRE_THROWS_AS( empty.pop(), Exception );
+    REQUIRE( empty.size() == 0 );
+  }
+}
