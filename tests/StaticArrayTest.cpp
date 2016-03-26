@@ -11,6 +11,7 @@ struct Num {
   int value;
 
   Num(int val = 100) :value(val) { }
+  bool operator==(const Num& n) const { return value == n.value; }
 };
 
 typedef StaticArray<int> IntStaticArray;
@@ -103,3 +104,51 @@ TEST_CASE("StaticArray.operator[]", "[StaticArray]") {
   }
 }
 
+TEST_CASE("StaticArray.operator==", "[StaticArray]") {
+  IntStaticArray a((int[]){1, 3, 5, 7, 9}, 5);
+
+  SECTION("returns true for its own identity") {
+    REQUIRE( a == a );
+  }
+
+  SECTION("returns true for the empty set") {
+    IntStaticArray empty1;
+    IntStaticArray empty2;
+
+    REQUIRE(empty1 == empty2 );
+  }
+
+  SECTION("returns true when both sets have equivalent contents") {
+    IntStaticArray b((int[]){1, 3, 5, 7, 9}, 5);
+
+    REQUIRE( a == b );
+  }
+
+  SECTION("returns false for sets with different lengths") {
+    IntStaticArray b((int[]){1, 3, 5, 7, 9, 11, 13}, 7);
+
+    REQUIRE( ! (a == b) );
+    REQUIRE( ! (b == a) );
+  }
+
+  SECTION("returns false for sets with different contents") {
+    IntStaticArray b((int[]){2, 4, 6, 8, 10}, 5);
+
+    REQUIRE( ! (a == b) );
+  }
+
+  SECTION("returns false for sets with contents in different order") {
+    IntStaticArray b((int[]){1, 3, 7, 5, 9}, 5);
+
+    REQUIRE( ! (a == b) );
+  }
+}
+
+TEST_CASE("StaticArray.operator!=", "[StaticArray]") {
+  IntStaticArray a((int[]){1, 3, 5, 7, 9}, 5);
+  IntStaticArray b((int[]){1, 3, 7, 5, 9}, 5);
+
+  SECTION("is the opposite of ==") {
+    REQUIRE( a != b );
+  }
+}

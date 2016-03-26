@@ -38,6 +38,20 @@ namespace Objects {
 
     T operator[](index_t index) const { return _data[normalizeIndex(index)]; }
 
+    virtual bool operator==(const Sequence<T>& seq) const {
+      index_t len = size();
+
+      if (len != seq.size()) return false;
+
+      for (index_t i = 0; i < len; ++i)
+        if ( ! (this->get(i) == seq.get(i)) )
+          return false;
+
+      return true;
+    }
+
+    virtual bool operator!=(const Sequence<T>& seq) const { return ! ( *this == seq ); }
+
   protected:
 
     index_t normalizeIndex(index_t index) const {

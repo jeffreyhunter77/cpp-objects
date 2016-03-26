@@ -11,6 +11,7 @@ struct Num {
   int value;
 
   Num(int val = 100) :value(val) { }
+  bool operator==(const Num& n) const { return value == n.value; }
 };
 
 typedef Array<int> IntArray;
