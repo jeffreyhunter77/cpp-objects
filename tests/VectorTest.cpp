@@ -202,3 +202,33 @@ TEST_CASE("Vector.remove", "[Vector]") {
     REQUIRE_THROWS_AS( v.remove(-6), Exception );
   }
 }
+
+TEST_CASE("Vector.shift", "[Vector]") {
+  IntVector v((int[]){2, 4, 6, 8}, 4);
+
+  SECTION("removes an item from the start of the vector and returns it") {
+    REQUIRE( v.shift() == 2 );
+    REQUIRE( v == IntVector((int[]){4, 6, 8}, 3) );
+  }
+
+  SECTION("throws an error when called on an empty vector") {
+    IntVector empty;
+    REQUIRE_THROWS_AS( empty.shift(), Exception );
+  }
+}
+
+TEST_CASE("Vector.unshift", "[Vector]") {
+  IntVector v((int[]){4, 6, 8}, 3);
+
+  SECTION("adds an item to the start of the vector") {
+    v.unshift(2);
+
+    REQUIRE( v == IntVector((int[]){2, 4, 6, 8}, 4) );
+  }
+
+  SECTION("supports chainin") {
+    v.unshift(2).unshift(0);
+
+    REQUIRE( v == IntVector((int[]){0, 2, 4, 6, 8}, 5) );
+  }
+}

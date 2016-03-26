@@ -25,6 +25,8 @@ namespace Objects {
 
     virtual Vector<T>& push(const T item) { return insert(_entries, item); }
     virtual T pop() { return remove(-1); }
+    virtual T shift() { return remove(0); }
+    virtual Vector<T>& unshift(const T item) { return insert(0, item); }
 
     virtual Vector<T>& insert(index_t atIndex, const T item) {
       ensureCapacity(_entries + 1);
