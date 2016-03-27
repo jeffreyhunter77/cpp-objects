@@ -226,3 +226,17 @@ TEST_CASE("StaticArray.slice(start)", "[StaticArray]") {
     REQUIRE( a.slice(-12) == a );
   }
 }
+
+TEST_CASE("StaticArray.operator=", "[StaticArray]") {
+  SECTION("allows assignment") {
+    IntStaticArray a((int[]){1, 3, 5}, 3);
+    IntStaticArray b;
+
+    REQUIRE( a != b );
+
+    b = a;
+
+    REQUIRE( a == b );
+    REQUIRE( a.cArray() != b.cArray() );
+  }
+}

@@ -14,6 +14,7 @@ namespace Objects {
     Array() : StaticArray<T>() { }
     Array(index_t size) : StaticArray<T>(size) { }
     Array(const T* array, index_t size) : StaticArray<T>(array, size) { }
+    Array(const StaticArray<T>& array) : StaticArray<T>(array) { }
 
     const Class& classInfo() const { return ArrayClass; }
 

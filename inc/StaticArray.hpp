@@ -41,6 +41,11 @@ namespace Objects {
 
     T operator[](index_t index) const { return _data[normalizeIndex(index)]; }
 
+    virtual StaticArray<T>& operator=(const StaticArray<T>& array) {
+      assignArray(array);
+      return *this;
+    }
+
     virtual bool operator==(const Sequence<T>& seq) const {
       index_t len = size();
 
@@ -95,6 +100,17 @@ namespace Objects {
       if (index >= s || index < 0) throw Exception("Index out of range");
 
       return index;
+    }
+
+    void assignArray(const StaticArray<T>& array) {
+      _size = 0;
+
+      if (_data) {
+        delete[] _data;
+        _data = 0;
+      }
+
+      initWithData(array.cArray(), array.size());
     }
 
     index_t _size;

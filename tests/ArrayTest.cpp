@@ -56,6 +56,14 @@ TEST_CASE("Array constructor", "[Array]") {
     REQUIRE_THROWS_AS( IntArray a(-40), Exception );
   }
 
+  SECTION("allows copy construction") {
+    IntArray a((int[]){1, 3, 5}, 3);
+    IntArray b(a);
+
+    REQUIRE( a == b );
+    REQUIRE( a.cArray() != b.cArray() );
+  }
+
 }
 
 TEST_CASE("Array.classInfo", "[Array]") {
@@ -141,5 +149,19 @@ TEST_CASE("Array.operator[]=", "[Array]") {
   SECTION("throws an exception when given an index past the end of the list") {
     REQUIRE_THROWS_AS( a[7] = 0, Exception );
     REQUIRE_THROWS_AS( a[-12] = 0, Exception );
+  }
+}
+
+TEST_CASE("Array.operator=", "[Array]") {
+  SECTION("allows assignment") {
+    IntArray a((int[]){1, 3, 5}, 3);
+    IntArray b;
+
+    REQUIRE( a != b );
+
+    b = a;
+
+    REQUIRE( a == b );
+    REQUIRE( a.cArray() != b.cArray() );
   }
 }

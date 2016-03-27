@@ -38,6 +38,14 @@ TEST_CASE("Vector constructor", "[Vector]") {
     REQUIRE( v.cArray() != evens );
   }
 
+  SECTION("allows copy construction") {
+    IntVector a((int[]){1, 3, 5}, 3);
+    IntVector b(a);
+
+    REQUIRE( a == b );
+    REQUIRE( a.cArray() != b.cArray() );
+  }
+
 }
 
 TEST_CASE("Vector.classInfo", "[Vector]") {
@@ -230,5 +238,19 @@ TEST_CASE("Vector.unshift", "[Vector]") {
     v.unshift(2).unshift(0);
 
     REQUIRE( v == IntVector((int[]){0, 2, 4, 6, 8}, 5) );
+  }
+}
+
+TEST_CASE("Vector.operator=", "[Vector]") {
+  SECTION("allows assignment") {
+    IntVector a((int[]){1, 3, 5}, 3);
+    IntVector b;
+
+    REQUIRE( a != b );
+
+    b = a;
+
+    REQUIRE( a == b );
+    REQUIRE( a.cArray() != b.cArray() );
   }
 }

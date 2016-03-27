@@ -17,6 +17,7 @@ namespace Objects {
     Vector() : _entries(0), Array<T>() { }
     Vector(index_t capacity) : _entries(0), Array<T>(capacity) { }
     Vector(const T* array, index_t size) : _entries(size), Array<T>(array, size) { }
+    Vector(const StaticArray<T>& array) : _entries(array.size()), Array<T>(array) { }
 
     const Class& classInfo() const { return VectorClass; }
 
@@ -50,6 +51,13 @@ namespace Objects {
       --_entries;
 
       return item;
+    }
+
+    virtual Vector<T>& operator=(const StaticArray<T>& array) {
+      _entries = 0;
+      this->assignArray(array);
+      _entries = array.size();
+      return *this;
     }
 
   protected:
