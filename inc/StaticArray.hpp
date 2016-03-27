@@ -16,8 +16,11 @@ namespace Objects {
     StaticArray(index_t size) : _size(0), _data(0) { initWithSize(size); }
 
     StaticArray(const T* array, index_t size) : _size(0), _data(0) {
-      initWithSize(size);
-      for (index_t i = 0; i < size; ++i) _data[i] = array[i];
+      initWithData(array, size);
+    }
+
+    StaticArray(const StaticArray<T>& array) : _size(0), _data(0) {
+      initWithData(array.cArray(), array.size());
     }
 
     ~StaticArray() {
@@ -52,6 +55,37 @@ namespace Objects {
 
     virtual bool operator!=(const Sequence<T>& seq) const { return ! ( *this == seq ); }
 
+    virtual StaticArray<T> slice(index_t start) const {
+      if (start < 0)
+        return slice(start, -start);
+      else if (start <= size())
+        return slice(start, size() - start);
+      else
+        return slice(start, 0);
+    }
+
+    virtual StaticArray<T> slice(index_t start, index_t length) const {
+      index_t sz = size();
+
+      if (start < 0) start = sz + start;
+      if (start >= sz) return StaticArray<T>();
+
+      if (length < 0) {
+        length = sz + length;
+        if (start > 0) length -= start;
+      }
+
+      if (start < 0) {
+        length += start;
+        start = 0;
+      }
+
+      if (length < 0) length = 0;
+      if (length > start + sz) length = sz - start;
+
+      return StaticArray<T>(&(_data[start]), length);
+    }
+
   protected:
 
     index_t normalizeIndex(index_t index) const {
@@ -75,6 +109,11 @@ namespace Objects {
       if (!_data) throw Exception("Out of memory");
 
       _size = size;
+    }
+
+    void initWithData(const T* array, index_t size) {
+      initWithSize(size);
+      for (index_t i = 0; i < size; ++i) _data[i] = array[i];
     }
   };
 

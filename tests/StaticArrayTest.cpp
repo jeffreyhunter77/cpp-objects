@@ -56,6 +56,14 @@ TEST_CASE("StaticArray constructor", "[StaticArray]") {
     REQUIRE_THROWS_AS( IntStaticArray a(-40), Exception );
   }
 
+  SECTION("allows copy construction") {
+    IntStaticArray a((int[]){1, 3, 5}, 3);
+    IntStaticArray b(a);
+
+    REQUIRE( a == b );
+    REQUIRE( a.cArray() != b.cArray() );
+  }
+
 }
 
 TEST_CASE("StaticArray.classInfo", "[StaticArray]") {
@@ -150,5 +158,71 @@ TEST_CASE("StaticArray.operator!=", "[StaticArray]") {
 
   SECTION("is the opposite of ==") {
     REQUIRE( a != b );
+  }
+}
+
+TEST_CASE("StaticArray.slice(start, length)", "[StaticArray]") {
+  IntStaticArray a((int[]){1, 3, 5, 7, 9, 11, 13}, 7);
+  IntStaticArray empty;
+
+  SECTION("returns a deep copy starting at offset for the given length") {
+    REQUIRE( a.slice(2, 3) == IntStaticArray((int[]){5, 7, 9}, 3) );
+    REQUIRE( a.slice(2, 3).cArray() != a.cArray() );
+  }
+
+  SECTION("can return a zero-length slice") {
+    REQUIRE( a.slice(2, 0) == empty );
+    REQUIRE( empty.slice(0, 0) == empty );
+  }
+
+  SECTION("accepts a negative offset as distance from the end") {
+    REQUIRE( a.slice(-3, 3) == IntStaticArray((int[]){9, 11, 13}, 3) );
+  }
+
+  SECTION("accepts a negative length as distance from the end") {
+    REQUIRE( a.slice(2, -2) == IntStaticArray((int[]){5, 7, 9}, 3) );
+  }
+
+  SECTION("ignores an offset beyond the end of the array") {
+    REQUIRE( a.slice(12, 3) == empty );
+  }
+
+  SECTION("ignores an offset before the start of the array") {
+    REQUIRE( a.slice(-12, 3) == empty );
+    REQUIRE( a.slice(-9, 3) == IntStaticArray((int[]){1}, 1) );
+  }
+
+  SECTION("ignores length beyond the end of the array") {
+    REQUIRE( a.slice(3, 12) == IntStaticArray((int[]){7, 9, 11, 13}, 4) );
+  }
+
+  SECTION("ignores length before the starting offset") {
+    REQUIRE( a.slice(3, -12) == empty );
+  }
+}
+
+TEST_CASE("StaticArray.slice(start)", "[StaticArray]") {
+  IntStaticArray a((int[]){1, 3, 5, 7, 9, 11, 13}, 7);
+  IntStaticArray empty;
+
+  SECTION("returns a deep copy from start to the end of the string") {
+    REQUIRE( a.slice(2) == IntStaticArray((int[]){5, 7, 9, 11, 13}, 5) );
+    REQUIRE( a.slice(2).cArray() != a.cArray() );
+  }
+
+  SECTION("can return a zero-length slice") {
+    REQUIRE( empty.slice(0) == empty );
+  }
+
+  SECTION("accepts a negative offset as distance from the end") {
+    REQUIRE( a.slice(-3) == IntStaticArray((int[]){9, 11, 13}, 3) );
+  }
+
+  SECTION("ignores an offset beyond the end of the array") {
+    REQUIRE( a.slice(12) == empty );
+  }
+
+  SECTION("ignores an offset before the start of the array") {
+    REQUIRE( a.slice(-12) == a );
   }
 }
