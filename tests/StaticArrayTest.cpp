@@ -91,6 +91,12 @@ TEST_CASE("StaticArray.get", "[StaticArray]") {
     REQUIRE_THROWS_AS( a.get(7), Exception );
     REQUIRE_THROWS_AS( a.get(-12), Exception );
   }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    a.errorValue(-1);
+    REQUIRE( a.get(7) == -1 );
+    REQUIRE( a.get(-12) == -1 );
+  }
 }
 
 
@@ -109,6 +115,12 @@ TEST_CASE("StaticArray.operator[]", "[StaticArray]") {
   SECTION("throws an exception when given an index past the end of the list") {
     REQUIRE_THROWS_AS( a[7], Exception );
     REQUIRE_THROWS_AS( a[-12], Exception );
+  }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    a.errorValue(-1);
+    REQUIRE( a[7] == -1 );
+    REQUIRE( a[-12] == -1 );
   }
 }
 
@@ -238,5 +250,41 @@ TEST_CASE("StaticArray.operator=", "[StaticArray]") {
 
     REQUIRE( a == b );
     REQUIRE( a.cArray() != b.cArray() );
+  }
+}
+
+TEST_CASE("StaticArray.errorValue()", "[StaticArray]") {
+  IntStaticArray a;
+
+  SECTION("returns the current error value") {
+    a.errorValue(-1);
+    REQUIRE( a.errorValue() == -1 );
+  }
+
+  SECTION("throws an error value if none is configured") {
+    REQUIRE_THROWS_AS( a.errorValue(), Exception );
+  }
+}
+
+TEST_CASE("StaticArray.errorValue(values)", "[StaticArray]") {
+  IntStaticArray a;
+
+  SECTION("sets the error value to use in place of an exception") {
+    a.errorValue(0);
+    REQUIRE( a.get(5) == 0 );
+  }
+}
+
+TEST_CASE("StaticArray.resetErrorValue()", "[StaticArray]") {
+  IntStaticArray a;
+  a.errorValue(-1);
+
+  SECTION("restores exception throwing as the error behavior") {
+    REQUIRE( a.hasErrorValue() );
+
+    a.resetErrorValue();
+
+    REQUIRE( !a.hasErrorValue() );
+    REQUIRE_THROWS_AS( a.get(5), Exception );
   }
 }

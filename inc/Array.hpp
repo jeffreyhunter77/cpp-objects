@@ -18,9 +18,18 @@ namespace Objects {
 
     const Class& classInfo() const { return ArrayClass; }
 
-    virtual void set(index_t index, const T& value) { this->_data[this->normalizeIndex(index)] = value; }
+    virtual void set(index_t index, const T& value) { this->_data[indexForSet(index)] = value; }
 
-    virtual T& operator[](index_t index) { return this->_data[this->normalizeIndex(index)]; }
+    virtual T& operator[](index_t index) { return this->_data[indexForSet(index)]; }
+
+  protected:
+    index_t indexForSet(index_t index) {
+      index = this->normalizeIndex(index);
+
+      if ( ! this->indexInRange(index) ) throw Exception("Index out of range");
+
+      return index;
+    }
   };
 
 };

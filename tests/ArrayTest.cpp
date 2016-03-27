@@ -91,6 +91,12 @@ TEST_CASE("Array.get", "[Array]") {
     REQUIRE_THROWS_AS( a.get(7), Exception );
     REQUIRE_THROWS_AS( a.get(-12), Exception );
   }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    a.errorValue(-1);
+    REQUIRE( a.get(7) == -1 );
+    REQUIRE( a.get(-12) == -1 );
+  }
 }
 
 
@@ -109,6 +115,12 @@ TEST_CASE("Array.operator[]", "[Array]") {
   SECTION("throws an exception when given an index past the end of the list") {
     REQUIRE_THROWS_AS( a[7], Exception );
     REQUIRE_THROWS_AS( a[-12], Exception );
+  }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    a.errorValue(-1);
+    REQUIRE( a.get(7) == -1 );
+    REQUIRE( a.get(-12) == -1 );
   }
 }
 

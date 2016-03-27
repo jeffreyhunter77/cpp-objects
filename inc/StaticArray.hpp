@@ -11,15 +11,15 @@ namespace Objects {
   public:
     typedef typename Sequence<T>::index_t index_t;
 
-    StaticArray() : _size(0), _data(0) { }
+    StaticArray() : _size(0), _data(0), _throwExceptions(true) { }
 
-    StaticArray(index_t size) : _size(0), _data(0) { initWithSize(size); }
+    StaticArray(index_t size) : _size(0), _data(0), _throwExceptions(true) { initWithSize(size); }
 
-    StaticArray(const T* array, index_t size) : _size(0), _data(0) {
+    StaticArray(const T* array, index_t size) : _size(0), _data(0), _throwExceptions(true) {
       initWithData(array, size);
     }
 
-    StaticArray(const StaticArray<T>& array) : _size(0), _data(0) {
+    StaticArray(const StaticArray<T>& array) : _size(0), _data(0), _throwExceptions(true) {
       initWithData(array.cArray(), array.size());
     }
 
@@ -37,9 +37,13 @@ namespace Objects {
     T* cArray() { return _data; }
     const T* cArray() const { return _data; }
 
-    T get(index_t index) const { return _data[normalizeIndex(index)]; }
+    T get(index_t index) const {
+      index = normalizeIndex(index);
+      if ( ! indexInRange(index) ) return errorValue();
+      return _data[index];
+    }
 
-    T operator[](index_t index) const { return _data[normalizeIndex(index)]; }
+    T operator[](index_t index) const { return get(index); }
 
     virtual StaticArray<T>& operator=(const StaticArray<T>& array) {
       assignArray(array);
@@ -91,19 +95,35 @@ namespace Objects {
       return StaticArray<T>(&(_data[start]), length);
     }
 
+    virtual T errorValue() const {
+      if (_throwExceptions) throw Exception("Index out of range");
+      return _errorValue;
+    }
+    virtual void errorValue(const T& value) {
+      _throwExceptions = false;
+      _errorValue = value;
+    }
+    virtual void resetErrorValue() {
+      _throwExceptions = true;
+    }
+    virtual bool hasErrorValue() const {
+      return !_throwExceptions;
+    }
+
   protected:
 
     index_t normalizeIndex(index_t index) const {
-      index_t s = size();
+      return (index < 0 ? size() + index : index);
+    }
 
-      if (index < 0) index = s + index;
-      if (index >= s || index < 0) throw Exception("Index out of range");
-
-      return index;
+    bool indexInRange(index_t index) const {
+      return (index < size() && index >= 0);
     }
 
     void assignArray(const StaticArray<T>& array) {
       _size = 0;
+      _throwExceptions = ! array.hasErrorValue();
+      if (!_throwExceptions) _errorValue = array.errorValue();
 
       if (_data) {
         delete[] _data;
@@ -115,6 +135,8 @@ namespace Objects {
 
     index_t _size;
     T* _data;
+    bool _throwExceptions;
+    T _errorValue;
 
   private:
     void initWithSize(index_t size) {

@@ -32,7 +32,7 @@ namespace Objects {
     virtual Vector<T>& insert(index_t atIndex, const T item) {
       ensureCapacity(_entries + 1);
 
-      atIndex = atIndex == _entries ? atIndex : this->normalizeIndex(atIndex);
+      atIndex = atIndex == _entries ? atIndex : this->indexForSet(atIndex);
 
       shiftLeft(atIndex);
 
@@ -46,7 +46,10 @@ namespace Objects {
     virtual T remove(index_t atIndex) {
       T item = this->get(atIndex);
 
-      shiftRight(this->normalizeIndex(atIndex));
+      atIndex = this->normalizeIndex(atIndex);
+      if (!this->indexInRange(atIndex)) return this->errorValue();
+
+      shiftRight(atIndex);
 
       --_entries;
 

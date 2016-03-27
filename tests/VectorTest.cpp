@@ -109,6 +109,12 @@ TEST_CASE("Vector.get", "[Vector]") {
     REQUIRE_THROWS_AS( v.get(7), Exception );
     REQUIRE_THROWS_AS( v.get(-12), Exception );
   }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    v.errorValue(-1);
+    REQUIRE( v.get(7) == -1 );
+    REQUIRE( v.get(-12) == -1 );
+  }
 }
 
 TEST_CASE("Vector.pop", "[Vector]") {
@@ -124,6 +130,13 @@ TEST_CASE("Vector.pop", "[Vector]") {
   SECTION("throws an exception when called on an empty vector") {
     IntVector empty;
     REQUIRE_THROWS_AS( empty.pop(), Exception );
+    REQUIRE( empty.size() == 0 );
+  }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    IntVector empty;
+    empty.errorValue(-1);
+    REQUIRE( empty.pop() == -1 );
     REQUIRE( empty.size() == 0 );
   }
 }
@@ -209,6 +222,13 @@ TEST_CASE("Vector.remove", "[Vector]") {
     REQUIRE_THROWS_AS( v.remove(5), Exception );
     REQUIRE_THROWS_AS( v.remove(-6), Exception );
   }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    v.errorValue(-1);
+    REQUIRE( v.remove(5) == -1 );
+    REQUIRE( v.remove(-6) == -1 );
+    REQUIRE( v.size() == 5 );
+  }
 }
 
 TEST_CASE("Vector.shift", "[Vector]") {
@@ -222,6 +242,12 @@ TEST_CASE("Vector.shift", "[Vector]") {
   SECTION("throws an error when called on an empty vector") {
     IntVector empty;
     REQUIRE_THROWS_AS( empty.shift(), Exception );
+  }
+
+  SECTION("allows configuration of an error value to return in place of an exception") {
+    IntVector empty;
+    empty.errorValue(-1);
+    REQUIRE( empty.shift() == -1 );
   }
 }
 
