@@ -7,19 +7,21 @@ namespace Objects {
 
   extern const Class StaticArrayClass;
 
+  template <class T> class StaticArrayWithErrorHandling;
+
   template <class T> class StaticArray : public Sequence<T> {
   public:
     typedef typename Sequence<T>::index_t index_t;
 
-    StaticArray() : _size(0), _data(0), _throwExceptions(true) { }
+    StaticArray() : _size(0), _data(0) { }
 
-    StaticArray(index_t size) : _size(0), _data(0), _throwExceptions(true) { initWithSize(size); }
+    StaticArray(index_t size) : _size(0), _data(0) { initWithSize(size); }
 
-    StaticArray(const T* array, index_t size) : _size(0), _data(0), _throwExceptions(true) {
+    StaticArray(const T* array, index_t size) : _size(0), _data(0) {
       initWithData(array, size);
     }
 
-    StaticArray(const StaticArray<T>& array) : _size(0), _data(0), _throwExceptions(true) {
+    StaticArray(const StaticArray<T>& array) : _size(0), _data(0) {
       initWithData(array.cArray(), array.size());
     }
 
@@ -95,20 +97,11 @@ namespace Objects {
       return StaticArray<T>(&(_data[start]), length);
     }
 
-    virtual T errorValue() const {
-      if (_throwExceptions) throw Exception("Index out of range");
-      return _errorValue;
-    }
-    virtual void errorValue(const T& value) {
-      _throwExceptions = false;
-      _errorValue = value;
-    }
-    virtual void resetErrorValue() {
-      _throwExceptions = true;
-    }
-    virtual bool hasErrorValue() const {
-      return !_throwExceptions;
-    }
+    virtual T errorValue() const { throw Exception("Index out of range"); }
+    virtual bool hasErrorValue() const { return false; }
+
+    inline StaticArrayWithErrorHandling<T> withErrorHandling();
+    inline StaticArrayWithErrorHandling<T> withErrorHandling(const T& errorValue);
 
   protected:
 
@@ -122,8 +115,6 @@ namespace Objects {
 
     void assignArray(const StaticArray<T>& array) {
       _size = 0;
-      _throwExceptions = ! array.hasErrorValue();
-      if (!_throwExceptions) _errorValue = array.errorValue();
 
       if (_data) {
         delete[] _data;
@@ -135,8 +126,6 @@ namespace Objects {
 
     index_t _size;
     T* _data;
-    bool _throwExceptions;
-    T _errorValue;
 
   private:
     void initWithSize(index_t size) {
@@ -154,6 +143,74 @@ namespace Objects {
       for (index_t i = 0; i < size; ++i) _data[i] = array[i];
     }
   };
+
+
+  template <class T> class ArrayErrorHandling {
+  public:
+    virtual T errorValue() const {
+      if (_throwExceptions) throw Exception("Index out of range");
+      return _errorValue;
+    }
+    virtual void errorValue(const T& value) {
+      _throwExceptions = false;
+      _errorValue = value;
+    }
+    virtual void resetErrorValue() {
+      _throwExceptions = true;
+    }
+    virtual bool hasErrorValue() const {
+      return !_throwExceptions;
+    }
+
+  protected:
+    ArrayErrorHandling() : _throwExceptions(true) { }
+    ArrayErrorHandling(const ArrayErrorHandling& copy) : _throwExceptions(!copy.hasErrorValue()) {
+      if (!_throwExceptions) _errorValue = copy.errorValue();
+    }
+    ArrayErrorHandling(bool useExceptions, const T& errorValue) : _throwExceptions(useExceptions), _errorValue(errorValue) { }
+
+    void assignErrorHandling(const ArrayErrorHandling& copy) {
+      _throwExceptions = ! copy.hasErrorValue();
+      if (!_throwExceptions) _errorValue = copy.errorValue();
+    }
+
+    bool _throwExceptions;
+    T _errorValue;
+  };
+
+
+  template <class T> class StaticArrayWithErrorHandling : public StaticArray<T>, public ArrayErrorHandling<T> {
+  public:
+    StaticArrayWithErrorHandling() { }
+    StaticArrayWithErrorHandling(const StaticArray<T>& copy) : StaticArray<T>(copy) { }
+    StaticArrayWithErrorHandling(const StaticArrayWithErrorHandling<T>& copy) : ArrayErrorHandling<T>(copy), StaticArray<T>(copy) { }
+
+    virtual StaticArrayWithErrorHandling<T>& operator=(const StaticArray<T>& array) {
+      this->assignArray(array);
+      return *this;
+    }
+
+    virtual StaticArrayWithErrorHandling<T>& operator=(const StaticArrayWithErrorHandling<T>& array) {
+      this->assignArray(array);
+      this->assignErrorHandling(array);
+      return *this;
+    }
+
+    virtual T errorValue() const { return ArrayErrorHandling<T>::errorValue(); }
+    virtual void errorValue(const T& value) { ArrayErrorHandling<T>::errorValue(value); }
+    virtual bool hasErrorValue() const { return ArrayErrorHandling<T>::hasErrorValue(); }
+  };
+
+
+  template <class T> inline StaticArrayWithErrorHandling<T> StaticArray<T>::withErrorHandling() {
+    return StaticArrayWithErrorHandling<T>(*this);
+  }
+
+  template <class T> inline StaticArrayWithErrorHandling<T> StaticArray<T>::withErrorHandling(const T& errorValue) {
+    StaticArrayWithErrorHandling<T> copy(*this);
+    copy.errorValue(errorValue);
+    return copy;
+  }
 
 };
 

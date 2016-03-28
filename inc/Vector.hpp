@@ -7,6 +7,8 @@ namespace Objects {
 
   extern const Class VectorClass;
 
+  template <class T> class VectorWithErrorHandling;
+
   template <class T> class Vector : public Array<T> {
   private:
     typedef Array<T> super;
@@ -63,6 +65,9 @@ namespace Objects {
       return *this;
     }
 
+    inline VectorWithErrorHandling<T> withErrorHandling();
+    inline VectorWithErrorHandling<T> withErrorHandling(const T& errorValue);
+
   protected:
     const static index_t MIN_CAPACITY = 6;
 
@@ -100,6 +105,39 @@ namespace Objects {
 
     index_t _entries;
   };
+
+  template <class T> class VectorWithErrorHandling : public Vector<T>, public ArrayErrorHandling<T> {
+  public:
+    VectorWithErrorHandling() { }
+    VectorWithErrorHandling(const Vector<T>& copy) : Vector<T>(copy) { }
+    VectorWithErrorHandling(const VectorWithErrorHandling<T>& copy) : ArrayErrorHandling<T>(copy), Vector<T>(copy) { }
+
+    virtual VectorWithErrorHandling<T>& operator=(const Vector<T>& array) {
+      this->assignArray(array);
+      return *this;
+    }
+
+    virtual VectorWithErrorHandling<T>& operator=(const VectorWithErrorHandling<T>& array) {
+      this->assignArray(array);
+      this->assignErrorHandling(array);
+      return *this;
+    }
+
+    virtual T errorValue() const { return ArrayErrorHandling<T>::errorValue(); }
+    virtual void errorValue(const T& value) { ArrayErrorHandling<T>::errorValue(value); }
+    virtual bool hasErrorValue() const { return ArrayErrorHandling<T>::hasErrorValue(); }
+  };
+
+
+  template <class T> inline VectorWithErrorHandling<T> Vector<T>::withErrorHandling() {
+    return VectorWithErrorHandling<T>(*this);
+  }
+
+  template <class T> inline VectorWithErrorHandling<T> Vector<T>::withErrorHandling(const T& errorValue) {
+    VectorWithErrorHandling<T> copy(*this);
+    copy.errorValue(errorValue);
+    return copy;
+  }
 
 };
 
